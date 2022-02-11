@@ -2,6 +2,9 @@ const express = require("express")
 const mongoose = require("mongoose")
 const cors = require("cors")
 
+require("dotenv").config()
+console.log('secret:', process.env.SECRET)
+
 const authRouter = require('./routes/authRoutes')
 const userRouter = require('./routes/userRoutes')
 

@@ -46,7 +46,7 @@ router.post("/register", async (req, res) => {
         name: newUser.name,
         id: newUser._id
       },
-      "mongo123" // secret      
+      process.env.SECRET
     )
 
     // return token
@@ -74,6 +74,8 @@ router.post("/login", async (req, res) => {
     return res.status(400).json({ error: "Senha ou e-mail incorreto"})
   }
 
+  console.log('user:', user)
+  console.log('secret:', process.env.SECRET)
   // check if password match
   const checkPassword = await bcrypt.compare(password, user.password)
 
@@ -87,7 +89,7 @@ router.post("/login", async (req, res) => {
       name: user.name,
       id: user._id
     },
-    "mongo123" // secret      
+    process.env.SECRET
   )
 
   // return token
