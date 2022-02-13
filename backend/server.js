@@ -3,10 +3,10 @@ const mongoose = require("mongoose")
 const cors = require("cors")
 
 require("dotenv").config()
-console.log('secret:', process.env.SECRET)
 
 const authRouter = require('./routes/authRoutes')
 const userRouter = require('./routes/userRoutes')
+const partyRouter = require('./routes/partyRoutes')
 
 const dbname = "partydb"
 const port = 3000
@@ -29,6 +29,9 @@ app.use('/api/auth', authRouter)
 
 // rota de usuários
 app.use('/api/user', userRouter)
+
+// rota de party
+app.use('/api/party', partyRouter)
 
 // conexão mongodb
 mongoose.connect(

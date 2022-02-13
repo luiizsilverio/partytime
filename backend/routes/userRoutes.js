@@ -27,7 +27,7 @@ router.get("/:id", verifyToken, async (req, res) => {
 
 router.put("/", verifyToken, async (req, res) => {
   const token = req.header('auth-token')
-  const { id: userReqId, password, confirmpassword } = req.body
+  const { id: userReqId, password, confirmPassword } = req.body
 
   const user = await getUserByToken(token)
 
@@ -43,8 +43,28 @@ router.put("/", verifyToken, async (req, res) => {
     name: req.body.name,
     email: req.body.email
   }
-
   
+  // check if passwords match
+  if (password !== confirmPassword) {
+    res.status(401).json({ error: "As senhas não conferem"})
+  }
+
+  // change password
+  if (password != null) {
+    const salt = await bcrypt.genSalt(12) // 12 caracteres
+    const passwordHash = await bcrypt.hash(password, salt)  
+    updateData.password = passwordHash
+  }
+
+  console.log(updateData)
+  try {
+    const data = await User.findOneAndUpdate({ _id: userId }, { $set: updateData }, { new: true })
+
+    res.json({ error: null, message: "Usuário atualizado com sucesso", data })
+
+  } catch(error) {
+    res.status(400).json({ error })
+  }  
 })
 
 module.exports = router

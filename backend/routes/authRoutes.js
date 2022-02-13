@@ -74,8 +74,6 @@ router.post("/login", async (req, res) => {
     return res.status(400).json({ error: "Senha ou e-mail incorreto"})
   }
 
-  console.log('user:', user)
-  console.log('secret:', process.env.SECRET)
   // check if password match
   const checkPassword = await bcrypt.compare(password, user.password)
 
