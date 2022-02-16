@@ -27,7 +27,7 @@ router.get("/:id", verifyToken, async (req, res) => {
 
 router.put("/", verifyToken, async (req, res) => {
   const token = req.header('auth-token')
-  const { id: userReqId, password, confirmPassword } = req.body
+  const { id: userReqId, password, confirmpassword } = req.body
 
   const user = await getUserByToken(token)
 
@@ -45,7 +45,7 @@ router.put("/", verifyToken, async (req, res) => {
   }
   
   // check if passwords match
-  if (password !== confirmPassword) {
+  if (password !== confirmpassword) {
     res.status(401).json({ error: "As senhas não conferem"})
   }
 
