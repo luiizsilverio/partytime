@@ -1,6 +1,6 @@
 <table>
   <tr>
-    <td><img src="https://github.com/luiizsilverio/partytime/blob/main/assets/logo.png" /></td>
+    <td><img src="https://github.com/luiizsilverio/partytime/blob/main/backend/assets/logo.png" /></td>
     <td><h1>PARTYTIME-API</h1></td>
   </tr>
 </table>
