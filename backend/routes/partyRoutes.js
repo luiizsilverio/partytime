@@ -16,7 +16,10 @@ const verifyToken = require("../middlewares/check-token")
 const getUserByToken = require("../helpers/get-user-by-token")
 
 // create a new party
-router.post("/", verifyToken, upload.fields([{ name: "photos" }]), async (req, res) => {
+router.post("/", 
+verifyToken, 
+upload.fields([{ name: "photos" }]), 
+async (req, res) => {
   const { title, description, party_date, privacy } = req.body
 
   if (!title || !description || !party_date) {
@@ -77,7 +80,7 @@ router.get("/all", async (req, res) => {
   try {
     const parties = await Party.find({ privacy: false }).sort([['_id', -1]])
 
-    res.json({ error: null, parties })
+    res.json({ error: null, data: parties })
 
   } catch (error) {
     return res.status(400).json({ error })
@@ -94,7 +97,7 @@ router.get("/userparties", verifyToken, async (req, res) => {
   try {
     const parties = await Party.find({ userId })
 
-    return res.json({ error: null, parties })
+    return res.json({ error: null, data: parties })
   
   } catch (error) {
     return res.status(400).json({ error })
@@ -113,7 +116,7 @@ router.get("/userparty/:id", verifyToken, async (req, res) => {
   try {
     const party = await Party.findOne({ _id: partyId, userId })
 
-    return res.json({ error: null, party })
+    return res.json({ error: null, data: party })
   
   } catch (error) {
     return res.status(400).json({ error })
@@ -133,7 +136,7 @@ router.get("/:id", async (req, res) => {
 
     // public party
     if (!party.privacy) {
-      return res.json({ error: null, party })
+      return res.json({ error: null, data: party })
       
       // private party
     } else {
@@ -144,7 +147,7 @@ router.get("/:id", async (req, res) => {
         const userId = userByToken._id.toString()  
 
         if (userId === party.userId.toString()) {
-          return res.json({ error: null, party })
+          return res.json({ error: null, data: party })
         } else {
           return res.status(400).json({ error: "Acesso negado*" })
         }
@@ -170,11 +173,81 @@ router.delete("/", verifyToken, async (req, res) => {
 
     await Party.deleteOne({ _id: partyId, userId })
 
-    res.json({ error:null, message: "Evento removido com sucesso"})
+    res.json({ error: null, message: "Evento removido com sucesso"})
 
   } catch (error) {
     return res.status(400).json({ error: "Acesso negado" })
   }
 })
 
+// update party
+router.put("/", 
+verifyToken, 
+upload.fields([{ name: "photos" }]), 
+async (req, res) => {
+
+  const { 
+    title, 
+    description, 
+    partyDate, 
+    privacy,
+    id: partyId, 
+    user_id: partyUserId
+  } = req.body
+
+  let files = []
+
+  if (req.files) {
+    files = req.files.photos
+  }
+
+  if (!title || !description || !partyDate) {
+    return res.status(400).json({ error: "Preencha o nome, a descrição e a data"})
+  }
+
+  // verify user
+  const token = req.header("auth-token")
+  const userByToken = await getUserByToken(token)
+  const userId = userByToken._id.toString()
+
+  if (userId !== partyUserId) {
+    return res.status(400).json({ error: "Acesso negado"})
+  }
+  
+  let photos = []
+
+  if (files && files.length > 0) {
+    files.forEach((photo, i) => {
+      photos[i] = photo.path
+    })
+  }
+  
+  // create party object
+  const party = {
+    id: partyId,
+    title,
+    description,
+    partyDate,
+    privacy,
+    photos,
+    userId
+  }
+
+  try {
+    const updatedParty = await Party.findOneAndUpdate(
+      { _id: partyId, userId },
+      { $set: party },
+      { new: true }
+    )
+
+    res.json({ 
+      error: null, 
+      message: "Evento atualizado com sucesso", 
+      data: updatedParty 
+    })
+  
+  } catch (error) {
+    return res.status(400).json({ error })
+  }  
+})
 module.exports = router
